@@ -1,4 +1,5 @@
 import time
+<<<<<<< HEAD
 import platform
 
 # Try to import hardware libraries, use mocks if not available
@@ -57,9 +58,28 @@ class ServoController:
             self.tilt_servo = MockServo(self.pca.channels[tilt_channel])
             print("✓ Mock hardware initialized")
         
+=======
+from adafruit_servokit import ServoKit
+
+class ServoController:
+    def __init__(self, pan_channel=0, tilt_channel=1):
+        # Initialize ServoKit with 16 channels
+        self.kit = ServoKit(channels=16)
+
+        # Store channel numbers
+        self.pan_channel = pan_channel
+        self.tilt_channel = tilt_channel
+
+        # Define servo references (X-axis = pan, Y-axis = tilt)
+        self.pan_servo = self.kit.servo[pan_channel]    # Channel 0 - Horizontal/Pan
+        self.tilt_servo = self.kit.servo[tilt_channel]  # Channel 1 - Vertical/Tilt
+
+        # Track current angles
+>>>>>>> e68ce868aa286f9d8bea343e6f5cc617eadc5d25
         self.pan_angle = 90
         self.tilt_angle = 90
-        
+
+        # Initialize to center position
         self.pan_servo.angle = self.pan_angle
         self.tilt_servo.angle = self.tilt_angle
         time.sleep(0.5)
@@ -98,4 +118,5 @@ class ServoController:
         return {"pan": self.pan_angle, "tilt": self.tilt_angle}
     
     def cleanup(self):
-        self.pca.deinit()
+        """Cleanup resources. ServoKit handles cleanup automatically."""
+        pass
