@@ -9,26 +9,32 @@ def get_current_time(city: str) -> dict:
 
 def move_camera_up(step: int = 10) -> dict:
     """Move the camera up by tilting servo."""
+    print("Moved camera up")
     return servo_controller.move_up(step)
 
 def move_camera_down(step: int = 10) -> dict:
     """Move the camera down by tilting servo."""
+    print("Moved camera down")
     return servo_controller.move_down(step)
 
 def move_camera_left(step: int = 10) -> dict:
     """Move the camera left by panning servo."""
+    print("Moved camera left")
     return servo_controller.move_left(step)
 
 def move_camera_right(step: int = 10) -> dict:
     """Move the camera right by panning servo."""
+    print("Moved camera right")
     return servo_controller.move_right(step)
 
 def center_camera() -> dict:
     """Center the camera to default position (pan=90, tilt=90)."""
+    print("Center camera")
     return servo_controller.center()
 
 def set_camera_position(pan_angle: int, tilt_angle: int) -> dict:
     """Set specific pan and tilt angles for the camera."""
+    print(f'Moved camera to {tilt_angle} and {pan_angle}')
     return servo_controller.set_pan_tilt(pan_angle, tilt_angle)
 
 def get_camera_position() -> dict:
