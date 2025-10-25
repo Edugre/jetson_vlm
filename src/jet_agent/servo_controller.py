@@ -1,5 +1,4 @@
 import time
-<<<<<<< HEAD
 import platform
 
 # Try to import hardware libraries, use mocks if not available
@@ -12,29 +11,29 @@ try:
 except (ImportError, NotImplementedError):
     HARDWARE_AVAILABLE = False
     print("⚠ Hardware libraries not available - using mock mode")
-    
+
     # Mock classes for testing without hardware
     class MockPCA9685:
         def __init__(self, i2c):
             self.frequency = 50
             self.channels = [MockChannel() for _ in range(16)]
             print("Mock PCA9685 initialized")
-        
+
         def deinit(self):
             print("Mock PCA9685 deinitialized")
-    
+
     class MockChannel:
         pass
-    
+
     class MockServo:
         def __init__(self, channel):
             self._angle = 90
             print(f"Mock servo initialized on channel")
-        
+
         @property
         def angle(self):
             return self._angle
-        
+
         @angle.setter
         def angle(self, value):
             self._angle = value
@@ -47,7 +46,7 @@ class ServoController:
             self.i2c = busio.I2C(board.SCL, board.SDA)
             self.pca = PCA9685(self.i2c)
             self.pca.frequency = 50
-            
+
             self.pan_servo = servo.Servo(self.pca.channels[pan_channel])
             self.tilt_servo = servo.Servo(self.pca.channels[tilt_channel])
             print("✓ Real hardware initialized")
@@ -57,25 +56,8 @@ class ServoController:
             self.pan_servo = MockServo(self.pca.channels[pan_channel])
             self.tilt_servo = MockServo(self.pca.channels[tilt_channel])
             print("✓ Mock hardware initialized")
-        
-=======
-from adafruit_servokit import ServoKit
-
-class ServoController:
-    def __init__(self, pan_channel=0, tilt_channel=1):
-        # Initialize ServoKit with 16 channels
-        self.kit = ServoKit(channels=16)
-
-        # Store channel numbers
-        self.pan_channel = pan_channel
-        self.tilt_channel = tilt_channel
-
-        # Define servo references (X-axis = pan, Y-axis = tilt)
-        self.pan_servo = self.kit.servo[pan_channel]    # Channel 0 - Horizontal/Pan
-        self.tilt_servo = self.kit.servo[tilt_channel]  # Channel 1 - Vertical/Tilt
 
         # Track current angles
->>>>>>> e68ce868aa286f9d8bea343e6f5cc617eadc5d25
         self.pan_angle = 90
         self.tilt_angle = 90
 
