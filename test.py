@@ -2,7 +2,6 @@ import streamlit as st
 from ultralytics import YOLO
 import cv2
 import numpy as np
-from bytetrack import ByteTracker
 
 st.set_page_config(page_title="EVE – Jetson YOLO", layout="wide")
 
