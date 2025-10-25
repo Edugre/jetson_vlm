@@ -1,0 +1,260 @@
+[2025-10-25T18:12:53] Anomaly: person entered (first seen). Hint side=center-x, vert=up
+[2025-10-25T18:13:07] Info: person left frame.
+[2025-10-25T18:13:07] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:13:07] Info: person left frame.
+[2025-10-25T18:13:07] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:13:07] Info: person left frame.
+[2025-10-25T18:13:08] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:08] Info: person left frame.
+[2025-10-25T18:13:08] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:08] Info: person left frame.
+[2025-10-25T18:13:08] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:09] Info: person left frame.
+[2025-10-25T18:13:09] Anomaly: person entered (first seen). Hint side=left, vert=down
+[2025-10-25T18:13:09] Info: person left frame.
+[2025-10-25T18:13:09] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:09] Info: person left frame.
+[2025-10-25T18:13:09] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:13:10] Info: person left frame.
+[2025-10-25T18:13:10] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:10] Info: person left frame.
+[2025-10-25T18:13:10] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:13:10] Info: person left frame.
+[2025-10-25T18:13:10] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:13:10] Info: person left frame.
+[2025-10-25T18:13:11] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:11] Info: person left frame.
+[2025-10-25T18:13:11] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:11] Info: person left frame.
+[2025-10-25T18:13:12] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:12] Info: person left frame.
+[2025-10-25T18:13:12] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:12] Info: person left frame.
+[2025-10-25T18:13:13] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:13] Info: person left frame.
+[2025-10-25T18:13:13] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:13] Info: person left frame.
+[2025-10-25T18:13:13] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:13:13] Info: person left frame.
+[2025-10-25T18:13:13] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:13:14] Info: person left frame.
+[2025-10-25T18:13:14] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:14] Info: person left frame.
+[2025-10-25T18:13:14] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:14] Info: person left frame.
+[2025-10-25T18:13:14] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:13:15] Info: person left frame.
+[2025-10-25T18:13:15] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:15] Info: person left frame.
+[2025-10-25T18:13:15] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:15] Info: person left frame.
+[2025-10-25T18:13:15] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:15] Info: person left frame.
+[2025-10-25T18:13:16] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:16] Info: person left frame.
+[2025-10-25T18:13:16] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:13:23] Info: person left frame.
+[2025-10-25T18:13:23] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:23] Info: person left frame.
+[2025-10-25T18:13:23] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:13:23] Info: person left frame.
+[2025-10-25T18:13:24] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:13:38] Info: person left frame.
+[2025-10-25T18:13:39] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:13:44] Info: person left frame.
+[2025-10-25T18:13:44] Anomaly: person entered (first seen). Hint side=center-x, vert=up
+[2025-10-25T18:13:44] Info: person left frame.
+[2025-10-25T18:13:45] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:13:58] Info: person left frame.
+[2025-10-25T18:13:58] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:13:58] Info: person left frame.
+[2025-10-25T18:13:59] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:03] Info: person left frame.
+[2025-10-25T18:14:04] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:04] Info: person left frame.
+[2025-10-25T18:14:05] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:09] Info: person left frame.
+[2025-10-25T18:14:09] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:10] Info: person left frame.
+[2025-10-25T18:14:18] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:18] Info: person left frame.
+[2025-10-25T18:14:19] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:19] Info: person left frame.
+[2025-10-25T18:14:20] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:24] Info: person left frame.
+[2025-10-25T18:14:24] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:24] Info: person left frame.
+[2025-10-25T18:14:25] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:25] Info: person left frame.
+[2025-10-25T18:14:25] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:27] Info: person left frame.
+[2025-10-25T18:14:28] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:33] Info: person left frame.
+[2025-10-25T18:14:33] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:14:33] Info: person left frame.
+[2025-10-25T18:14:33] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:14:33] Info: person left frame.
+[2025-10-25T18:14:34] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:14:34] Info: person left frame.
+[2025-10-25T18:14:34] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:14:34] Info: person left frame.
+[2025-10-25T18:14:35] Anomaly: person entered (first seen). Hint side=right, vert=up
+[2025-10-25T18:14:35] Info: person left frame.
+[2025-10-25T18:14:36] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:36] Info: person left frame.
+[2025-10-25T18:14:36] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:36] Info: person left frame.
+[2025-10-25T18:14:36] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:38] Info: person left frame.
+[2025-10-25T18:14:38] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:39] Info: person left frame.
+[2025-10-25T18:14:39] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:39] Info: person left frame.
+[2025-10-25T18:14:39] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:14:40] Info: person left frame.
+[2025-10-25T18:14:45] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:14:46] Info: person left frame.
+[2025-10-25T18:14:48] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:48] Info: person left frame.
+[2025-10-25T18:14:49] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:49] Info: person left frame.
+[2025-10-25T18:14:49] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:49] Info: person left frame.
+[2025-10-25T18:14:49] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:49] Info: person left frame.
+[2025-10-25T18:14:49] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:50] Info: person left frame.
+[2025-10-25T18:14:50] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:14:52] Info: person left frame.
+[2025-10-25T18:14:52] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:52] Info: person left frame.
+[2025-10-25T18:14:53] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:53] Info: person left frame.
+[2025-10-25T18:14:53] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:53] Info: person left frame.
+[2025-10-25T18:14:54] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:54] Info: person left frame.
+[2025-10-25T18:14:54] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:54] Info: person left frame.
+[2025-10-25T18:14:54] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:55] Info: person left frame.
+[2025-10-25T18:14:55] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:55] Info: person left frame.
+[2025-10-25T18:14:55] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:55] Info: person left frame.
+[2025-10-25T18:14:55] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:14:55] Info: person left frame.
+[2025-10-25T18:17:27] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:43] Info: person left frame.
+[2025-10-25T18:17:43] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:17:44] Info: person left frame.
+[2025-10-25T18:17:44] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:17:46] Info: person left frame.
+[2025-10-25T18:17:47] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:48] Info: person left frame.
+[2025-10-25T18:17:49] Anomaly: person entered (first seen). Hint side=left, vert=down
+[2025-10-25T18:17:49] Info: person left frame.
+[2025-10-25T18:17:49] Anomaly: person entered (first seen). Hint side=left, vert=down
+[2025-10-25T18:17:50] Info: person left frame.
+[2025-10-25T18:17:50] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:50] Info: person left frame.
+[2025-10-25T18:17:50] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:17:50] Info: person left frame.
+[2025-10-25T18:17:51] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:51] Info: person left frame.
+[2025-10-25T18:17:51] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:51] Info: person left frame.
+[2025-10-25T18:17:52] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:52] Info: person left frame.
+[2025-10-25T18:17:52] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:52] Info: person left frame.
+[2025-10-25T18:17:52] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:53] Info: person left frame.
+[2025-10-25T18:17:53] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:53] Info: person left frame.
+[2025-10-25T18:17:53] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:17:53] Info: person left frame.
+[2025-10-25T18:17:54] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:17:54] Info: person left frame.
+[2025-10-25T18:17:54] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:55] Info: person left frame.
+[2025-10-25T18:17:55] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:55] Info: person left frame.
+[2025-10-25T18:17:55] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:17:56] Info: person left frame.
+[2025-10-25T18:17:57] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:00] Info: person left frame.
+[2025-10-25T18:18:00] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:00] Info: person left frame.
+[2025-10-25T18:18:01] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:01] Info: person left frame.
+[2025-10-25T18:18:01] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:12] Info: person left frame.
+[2025-10-25T18:18:12] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:12] Info: person left frame.
+[2025-10-25T18:18:12] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:12] Info: person left frame.
+[2025-10-25T18:18:12] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:13] Info: person left frame.
+[2025-10-25T18:18:13] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:13] Info: person left frame.
+[2025-10-25T18:18:13] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:15] Info: person left frame.
+[2025-10-25T18:18:15] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:15] Info: person left frame.
+[2025-10-25T18:18:15] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:15] Info: person left frame.
+[2025-10-25T18:18:16] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:16] Info: person left frame.
+[2025-10-25T18:18:17] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:17] Info: person left frame.
+[2025-10-25T18:18:18] Anomaly: person entered (first seen). Hint side=left, vert=up
+[2025-10-25T18:18:19] Info: person left frame.
+[2025-10-25T18:18:19] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:18:22] Info: person left frame.
+[2025-10-25T18:18:22] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:23] Info: person left frame.
+[2025-10-25T18:18:23] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:24] Info: person left frame.
+[2025-10-25T18:18:24] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:24] Info: person left frame.
+[2025-10-25T18:18:24] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:24] Info: person left frame.
+[2025-10-25T18:18:25] Anomaly: person entered (first seen). Hint side=center-x, vert=up
+[2025-10-25T18:18:25] Info: person left frame.
+[2025-10-25T18:18:25] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:26] Info: person left frame.
+[2025-10-25T18:18:26] Anomaly: person entered (first seen). Hint side=right, vert=down
+[2025-10-25T18:18:27] Info: person left frame.
+[2025-10-25T18:18:27] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:18:27] Info: person left frame.
+[2025-10-25T18:18:28] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:18:28] Info: person left frame.
+[2025-10-25T18:18:28] Anomaly: person entered (first seen). Hint side=right, vert=center-y
+[2025-10-25T18:18:28] Info: person left frame.
+[2025-10-25T18:18:28] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:28] Info: person left frame.
+[2025-10-25T18:18:28] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:28] Info: person left frame.
+[2025-10-25T18:18:29] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:29] Info: person left frame.
+[2025-10-25T18:18:29] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:18:29] Info: person left frame.
+[2025-10-25T18:18:29] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:30] Info: person left frame.
+[2025-10-25T18:18:30] Anomaly: person entered (first seen). Hint side=left, vert=center-y
+[2025-10-25T18:18:30] Info: person left frame.
+[2025-10-25T18:18:30] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:30] Info: person left frame.
+[2025-10-25T18:18:31] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:31] Info: person left frame.
+[2025-10-25T18:18:31] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:31] Info: person left frame.
+[2025-10-25T18:18:31] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:31] Info: person left frame.
+[2025-10-25T18:18:31] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:31] Info: person left frame.
+[2025-10-25T18:18:32] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:32] Info: person left frame.
+[2025-10-25T18:18:34] Anomaly: person entered (first seen). Hint side=center-x, vert=center-y
+[2025-10-25T18:18:34] Info: person left frame.

@@ -42,7 +42,7 @@ def nudge_to_center(servo, frame_w, frame_h, bbox):
     return side, vert
 
 def main():
-    det = YOLODetector(source="/dev/video1", imgsz=IMG_SZ, device="cuda:0", half=True)
+    det = YOLODetector(source="/dev/video0", imgsz=IMG_SZ, device="cuda:0", half=True)
     servo = ServoController()
     had_person = False
 
