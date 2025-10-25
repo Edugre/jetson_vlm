@@ -1,21 +1,24 @@
 import time
-import board
-import busio
-from adafruit_pca9685 import PCA9685
-from adafruit_motor import servo
+from adafruit_servokit import ServoKit
 
 class ServoController:
     def __init__(self, pan_channel=0, tilt_channel=1):
-        self.i2c = busio.I2C(board.SCL, board.SDA)
-        self.pca = PCA9685(self.i2c)
-        self.pca.frequency = 50
-        
-        self.pan_servo = servo.Servo(self.pca.channels[pan_channel])
-        self.tilt_servo = servo.Servo(self.pca.channels[tilt_channel])
-        
+        # Initialize ServoKit with 16 channels
+        self.kit = ServoKit(channels=16)
+
+        # Store channel numbers
+        self.pan_channel = pan_channel
+        self.tilt_channel = tilt_channel
+
+        # Define servo references (X-axis = pan, Y-axis = tilt)
+        self.pan_servo = self.kit.servo[pan_channel]    # Channel 0 - Horizontal/Pan
+        self.tilt_servo = self.kit.servo[tilt_channel]  # Channel 1 - Vertical/Tilt
+
+        # Track current angles
         self.pan_angle = 90
         self.tilt_angle = 90
-        
+
+        # Initialize to center position
         self.pan_servo.angle = self.pan_angle
         self.tilt_servo.angle = self.tilt_angle
         time.sleep(0.5)
@@ -54,4 +57,5 @@ class ServoController:
         return {"pan": self.pan_angle, "tilt": self.tilt_angle}
     
     def cleanup(self):
-        self.pca.deinit()
+        """Cleanup resources. ServoKit handles cleanup automatically."""
+        pass
