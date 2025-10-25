@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-YOLO11 CSI Camera Integration for Jetson Nano
-Uses GStreamer pipeline to access CSI camera and run YOLO11 inference
+YOLO11 USB Camera Integration for Jetson Nano
+Uses USB camera to run YOLO11 inference
 """
 
 from ultralytics import YOLO
@@ -9,58 +9,18 @@ import cv2
 import argparse
 
 
-def gstreamer_pipeline(
-    sensor_id=0,
-    capture_width=1280,
-    capture_height=720,
-    display_width=640,
-    display_height=480,
-    framerate=30,
-    flip_method=0,
-):
-    """
-    Create GStreamer pipeline for CSI camera on Jetson Nano
-
-    Args:
-        sensor_id: Camera sensor ID (0 for primary CSI camera)
-        capture_width: Native capture width
-        capture_height: Native capture height
-        display_width: Output display width
-        display_height: Output display height
-        framerate: Camera framerate
-        flip_method: Flip method (0=none, 1=ccw, 2=180, 3=cw, 4=horizontal, 5=upper-right, 6=vertical, 7=upper-left)
-
-    Returns:
-        GStreamer pipeline string
-    """
-    return (
-        f"nvarguscamerasrc sensor-id={sensor_id} ! "
-        f"video/x-raw(memory:NVMM), width=(int){capture_width}, height=(int){capture_height}, "
-        f"format=(string)NV12, framerate=(fraction){framerate}/1 ! "
-        f"nvvidconv flip-method={flip_method} ! "
-        f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! "
-        f"videoconvert ! video/x-raw, format=(string)BGR ! appsink"
-    )
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run YOLO11 on Jetson CSI Camera")
+    parser = argparse.ArgumentParser(description="Run YOLO11 on Jetson USB Camera")
     parser.add_argument("--model", type=str, default="yolo11n.pt",
                         help="YOLO model to use (yolo11n.pt, yolo11s.pt, yolo11m.pt, etc.)")
-    parser.add_argument("--sensor-id", type=int, default=0,
-                        help="CSI camera sensor ID (default: 0)")
-    parser.add_argument("--capture-width", type=int, default=1280,
-                        help="Camera capture width (default: 1280)")
-    parser.add_argument("--capture-height", type=int, default=720,
-                        help="Camera capture height (default: 720)")
-    parser.add_argument("--display-width", type=int, default=640,
-                        help="Display width (default: 640)")
-    parser.add_argument("--display-height", type=int, default=480,
-                        help="Display height (default: 480)")
-    parser.add_argument("--framerate", type=int, default=30,
-                        help="Camera framerate (default: 30)")
-    parser.add_argument("--flip-method", type=int, default=0,
-                        help="Flip method 0-7 (default: 0)")
+    parser.add_argument("--device-id", type=int, default=1,
+                        help="USB camera device ID (default: 1, usually /dev/video1)")
+    parser.add_argument("--width", type=int, default=640,
+                        help="Camera width (default: 640)")
+    parser.add_argument("--height", type=int, default=480,
+                        help="Camera height (default: 480)")
     parser.add_argument("--conf", type=float, default=0.25,
                         help="Confidence threshold (default: 0.25)")
     parser.add_argument("--iou", type=float, default=0.45,
@@ -77,30 +37,25 @@ def main():
     print(f"Loading YOLO11 model: {args.model}")
     model = YOLO(args.model)
 
-    print("Opening CSI camera with GStreamer pipeline...")
-    pipeline = gstreamer_pipeline(
-        sensor_id=args.sensor_id,
-        capture_width=args.capture_width,
-        capture_height=args.capture_height,
-        display_width=args.display_width,
-        display_height=args.display_height,
-        framerate=args.framerate,
-        flip_method=args.flip_method
-    )
-
-    if args.verbose:
-        print(f"GStreamer pipeline: {pipeline}")
-
-    cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+    print(f"Opening USB camera (device {args.device_id})...")
+    cap = cv2.VideoCapture(args.device_id)
 
     if not cap.isOpened():
-        print("Error: Cannot open CSI camera")
+        print(f"Error: Cannot open USB camera at /dev/video{args.device_id}")
         print("Make sure the camera is properly connected and recognized by the system")
-        print("You can test with: gst-launch-1.0 nvarguscamerasrc sensor-id=0 ! nvvidconv ! xvimagesink")
+        print("You can list available cameras with: v4l2-ctl --list-devices")
         return
 
-    print("CSI camera opened successfully!")
-    print(f"Resolution: {args.display_width}x{args.display_height}")
+    # Set camera resolution
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+
+    # Get actual resolution (camera may not support requested resolution)
+    actual_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    print("USB camera opened successfully!")
+    print(f"Resolution: {actual_width}x{actual_height}")
     print("Press 'q' to quit")
 
     frame_count = 0
@@ -126,7 +81,7 @@ def main():
 
             # Display frame
             if args.show:
-                cv2.imshow('YOLO11 CSI Camera', annotated_frame)
+                cv2.imshow('YOLO11 USB Camera', annotated_frame)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("Quitting...")

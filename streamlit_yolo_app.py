@@ -209,7 +209,7 @@ def main():
                     annotated_frame_rgb = cv2.cvtColor(last_annotated_frame, cv2.COLOR_BGR2RGB)
 
                     # Display frame
-                    video_placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
+                    video_placeholder.image(annotated_frame_rgb, channels="RGB", width=True)
 
                     # Update stats
                     fps_text.metric("FPS", f"{fps:.1f}")
