@@ -117,11 +117,18 @@ class PersonDetectionNotifier:
         try:
             logger.info(f"Notifying ADK Agent: {message}")
             
-            # Send message to the agent
-            response = await self.agent.run_async(message)
+            # Send message to the agent - run_async returns an async generator
+            response_generator = self.agent.run_async(message)
             
-            if response:
-                logger.info(f"ADK Agent response: {response}")
+            # Collect all responses from the generator
+            responses = []
+            async for response in response_generator:
+                responses.append(response)
+            
+            if responses:
+                # Get the final response (usually the last one)
+                final_response = responses[-1] if responses else None
+                logger.info(f"ADK Agent response: {final_response}")
             else:
                 logger.warning("No response from ADK Agent")
                 

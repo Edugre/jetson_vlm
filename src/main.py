@@ -50,7 +50,7 @@ def nudge_to_center(servo, frame_w, frame_h, bbox):
 
     return side, vert
 
-async def enhanced_person_callback(event_data):
+def enhanced_person_callback(event_data):
     """Enhanced callback that provides person position data to the notifier"""
     try:
         persons = event_data.get("persons", [])
@@ -66,7 +66,7 @@ async def enhanced_person_callback(event_data):
                 "confidence": best_person.get("conf", 0)
             }
         
-        # Forward to the person notifier
+        # Forward to the person notifier (this will handle async internally)
         person_notifier.on_person_detected(event_data)
         
     except Exception as e:
@@ -123,9 +123,15 @@ def main():
 def run_eve_system():
     """Run the complete EVE system with async support"""
     try:
-        # Initialize asyncio event loop for ADK agent
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        # Check if there's already an event loop running
+        try:
+            loop = asyncio.get_running_loop()
+            logger.info("Using existing event loop")
+        except RuntimeError:
+            # No loop running, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            logger.info("Created new event loop")
         
         # Run the main detection loop
         main()
@@ -133,12 +139,12 @@ def run_eve_system():
     except Exception as e:
         logger.error(f"Failed to start EVE system: {e}")
     finally:
-        # Clean up
+        # Clean up only if we created the loop
         try:
             loop = asyncio.get_event_loop()
-            if not loop.is_closed():
+            if not loop.is_running() and not loop.is_closed():
                 loop.close()
-        except:
+        except Exception:
             pass
 
 if __name__ == "__main__":

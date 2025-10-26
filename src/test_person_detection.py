@@ -22,8 +22,14 @@ async def test_person_detection():
     # Test 1: Agent initialization
     print("\n1. Testing ADK Agent...")
     try:
-        response = await root_agent.run_async("Initialize security monitoring mode and center the camera.")
-        print(f"   ✅ Agent Response: {response}")
+        # Properly handle the async generator
+        response_generator = root_agent.run_async("Initialize security monitoring mode and center the camera.")
+        responses = []
+        async for response in response_generator:
+            responses.append(response)
+        
+        final_response = responses[-1] if responses else "No response"
+        print(f"   ✅ Agent Response: {final_response}")
     except Exception as e:
         print(f"   ❌ Agent Error: {e}")
     
