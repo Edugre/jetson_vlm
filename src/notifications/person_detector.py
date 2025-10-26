@@ -73,15 +73,20 @@ class PersonDetectionNotifier:
             center = best_person.get("center", [0, 0])
             confidence = best_person.get("conf", 0)
             
-            # Prepare message for ADK agent
+            # Prepare enhanced message for ADK agent with actionable instructions
             message = (
-                f"SECURITY ALERT: {person_count} person(s) detected! "
-                f"Primary target at position ({int(center[0])}, {int(center[1])}) "
+                f"🚨 SECURITY ALERT: {person_count} person(s) detected entering the monitoring area! "
+                f"Primary target located at coordinates X:{int(center[0])}, Y:{int(center[1])} "
                 f"with {confidence:.1%} confidence. "
-                f"Please track this person and adjust camera positioning."
+                f"IMMEDIATE ACTION REQUIRED: Use track_person_at_position({int(center[0])}, {int(center[1])}) "
+                f"to begin tracking this individual. Set alert mode and maintain visual contact."
             )
         else:
-            message = f"SECURITY ALERT: {person_count} person(s) detected! Please scan the area."
+            message = (
+                f"🚨 SECURITY ALERT: {person_count} person(s) detected! "
+                f"No precise position data available. "
+                f"IMMEDIATE ACTION: Use initiate_security_scan() to locate targets and set_alert_mode(True)."
+            )
         
         # Send to ADK agent asynchronously
         asyncio.create_task(self._notify_agent(message))
@@ -117,8 +122,18 @@ class PersonDetectionNotifier:
         try:
             logger.info(f"Notifying ADK Agent: {message}")
             
+            # Format message in the proper Gemini format that ADK expects
+            formatted_message = {
+                "role": "user",
+                "parts": [
+                    {
+                        "text": message
+                    }
+                ]
+            }
+            
             # Send message to the agent - run_async returns an async generator
-            response_generator = self.agent.run_async(message)
+            response_generator = self.agent.run_async(formatted_message)
             
             # Collect all responses from the generator
             responses = []

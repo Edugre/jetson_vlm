@@ -22,8 +22,18 @@ async def test_person_detection():
     # Test 1: Agent initialization
     print("\n1. Testing ADK Agent...")
     try:
+        # Format message properly for Google ADK agent
+        message = {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "Initialize security monitoring mode and center the camera."
+                }
+            ]
+        }
+        
         # Properly handle the async generator
-        response_generator = root_agent.run_async("Initialize security monitoring mode and center the camera.")
+        response_generator = root_agent.run_async(message)
         responses = []
         async for response in response_generator:
             responses.append(response)
