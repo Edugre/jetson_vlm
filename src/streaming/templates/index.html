@@ -491,6 +491,14 @@
             addLog(data.message, 'info');
         });
 
+        // Detailed tracking movements
+        socket.on('tracking_movement', function(data) {
+            const actions = data.actions.join(', ');
+            const pos = data.person_position;
+            const offsets = data.offsets;
+            addLog(`🎯 Tracking: ${actions} | Person: (${pos.x.toFixed(0)}, ${pos.y.toFixed(0)}) | Offsets: (${offsets.x.toFixed(2)}, ${offsets.y.toFixed(2)})`, 'info');
+        });
+
         // Status messages
         socket.on('status', function(data) {
             addLog(data.message, 'info');

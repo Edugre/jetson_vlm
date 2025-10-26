@@ -67,16 +67,20 @@ class YOLOVideoStreamer:
         # EVE tracking parameters
         self.tracking_enabled = True
         self.auto_tracking = True
-        self.pan_step_small = 3
-        self.tilt_step_small = 3
-        self.center_x_margin = 0.15  # Larger deadzone to prevent jitter
-        self.center_y_margin = 0.15
+        self.pan_step_small = 1  # Smaller steps for smoother movement
+        self.tilt_step_small = 1
+        self.center_x_margin = 0.08  # Smaller deadzone for more responsive tracking
+        self.center_y_margin = 0.08
         
         # Tracking control
         self.last_tracking_time = 0
-        self.tracking_cooldown = 0.5  # Minimum time between movements
-        self.min_tracking_confidence = 0.7  # Only track high-confidence detections
+        self.tracking_cooldown = 0.2  # Faster response time
+        self.min_tracking_confidence = 0.6  # Lower threshold for better detection
         self.last_tracked_person = None
+        
+        # Smooth tracking
+        self.max_step_size = 5  # Maximum movement per step
+        self.movement_scaling = 0.1  # How much of the offset to move per step
         
         # Statistics
         self.stats = {
@@ -517,7 +521,7 @@ class YOLOVideoStreamer:
             logger.error(f"Error in auto-tracking: {e}")
     
     def _nudge_to_center(self, bbox: list, frame_w: int, frame_h: int, person_data: dict = None) -> bool:
-        """Nudge camera to center the person (improved logic)"""
+        """Smooth camera tracking to center the person"""
         try:
             x1, y1, x2, y2 = bbox
             cx = (x1 + x2) / 2.0
@@ -527,56 +531,80 @@ class YOLOVideoStreamer:
             center_x = frame_w / 2.0
             center_y = frame_h / 2.0
             
-            # Calculate offsets from center
-            offset_x = cx - center_x
-            offset_y = cy - center_y
+            # Calculate normalized offsets (-1.0 to 1.0)
+            offset_x = (cx - center_x) / (frame_w / 2.0)
+            offset_y = (cy - center_y) / (frame_h / 2.0)
             
-            # Define movement thresholds (deadzone)
-            x_threshold = frame_w * self.center_x_margin
-            y_threshold = frame_h * self.center_y_margin
+            # Define movement thresholds
+            x_threshold = self.center_x_margin * 2  # Convert to normalized scale
+            y_threshold = self.center_y_margin * 2
             
             moved = False
             actions = []
+            
+            logger.debug(f"Person at ({cx:.0f}, {cy:.0f}), center at ({center_x:.0f}, {center_y:.0f})")
+            logger.debug(f"Normalized offsets: X={offset_x:.3f}, Y={offset_y:.3f}")
+            logger.debug(f"Thresholds: X={x_threshold:.3f}, Y={y_threshold:.3f}")
 
-            # Horizontal movement
+            # Calculate smooth movement steps based on offset magnitude
             if abs(offset_x) > x_threshold:
-                if offset_x > 0:  # Person is to the right, move camera right
-                    result = self.servo_controller.move_right(self.pan_step_small)
-                    actions.append("move_right")
+                # Calculate step size proportional to offset (but capped)
+                x_step = min(self.max_step_size, max(1, int(abs(offset_x) * 10)))
+                
+                if offset_x > 0:  # Person is to the right
+                    self.servo_controller.move_right(x_step)
+                    actions.append(f"right_{x_step}°")
                     moved = True
-                    logger.info(f"Moving camera RIGHT - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
-                else:  # Person is to the left, move camera left
-                    result = self.servo_controller.move_left(self.pan_step_small)
-                    actions.append("move_left")
+                    logger.info(f"Moving camera RIGHT {x_step}° - person at x={cx:.0f}, offset={offset_x:.3f}")
+                else:  # Person is to the left
+                    self.servo_controller.move_left(x_step)
+                    actions.append(f"left_{x_step}°")
                     moved = True
-                    logger.info(f"Moving camera LEFT - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
+                    logger.info(f"Moving camera LEFT {x_step}° - person at x={cx:.0f}, offset={offset_x:.3f}")
             else:
-                logger.debug(f"Horizontal CENTERED - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
+                logger.debug(f"X-axis CENTERED - offset {offset_x:.3f} within threshold {x_threshold:.3f}")
 
-            # Vertical movement (y=0 is top)
+            # Vertical movement - DEBUG Y-AXIS ISSUE
+            logger.debug(f"Y-axis check: abs({offset_y:.3f}) > {y_threshold:.3f} = {abs(offset_y) > y_threshold}")
+            
             if abs(offset_y) > y_threshold:
-                if offset_y > 0:  # Person is below center, move camera down
-                    result = self.servo_controller.move_down(self.tilt_step_small)
-                    actions.append("move_down")
+                # Calculate step size proportional to offset
+                y_step = min(self.max_step_size, max(1, int(abs(offset_y) * 10)))
+                
+                if offset_y > 0:  # Person is below center
+                    self.servo_controller.move_down(y_step)
+                    actions.append(f"down_{y_step}°")
                     moved = True
-                    logger.info(f"Moving camera DOWN - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
-                else:  # Person is above center, move camera up
-                    result = self.servo_controller.move_up(self.tilt_step_small)
-                    actions.append("move_up")
+                    logger.info(f"Moving camera DOWN {y_step}° - person at y={cy:.0f}, offset={offset_y:.3f}")
+                else:  # Person is above center
+                    self.servo_controller.move_up(y_step)
+                    actions.append(f"up_{y_step}°")
                     moved = True
-                    logger.info(f"Moving camera UP - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
+                    logger.info(f"Moving camera UP {y_step}° - person at y={cy:.0f}, offset={offset_y:.3f}")
             else:
-                logger.debug(f"Vertical CENTERED - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
+                logger.debug(f"Y-axis CENTERED - offset {offset_y:.3f} within threshold {y_threshold:.3f}")
             
             if moved:
-                logger.info(f"🎯 Camera tracking: {', '.join(actions)} - Person confidence: {person_data.get('conf', 0):.1%}")
+                confidence = person_data.get('conf', 0) if person_data else 0
+                logger.info(f"🎯 SMOOTH TRACKING: {', '.join(actions)} - Confidence: {confidence:.1%}")
+                
+                # Emit detailed tracking info to web interface
+                self.socketio.emit('tracking_movement', {
+                    'actions': actions,
+                    'person_position': {'x': cx, 'y': cy},
+                    'frame_center': {'x': center_x, 'y': center_y},
+                    'offsets': {'x': offset_x, 'y': offset_y},
+                    'confidence': confidence,
+                    'timestamp': time.time()
+                })
             else:
-                logger.debug(f"👁️  Person already centered - no movement needed")
+                logger.debug(f"👁️ Person centered - no movement (X:{offset_x:.3f}, Y:{offset_y:.3f})")
             
             return moved
             
         except Exception as e:
-            logger.error(f"Error in nudge_to_center: {e}")
+            logger.error(f"Error in smooth tracking: {e}")
+            logger.error(f"Bbox: {bbox}, Frame: {frame_w}x{frame_h}")
             return False
     
     def _on_detection_event(self, event_data: Dict[str, Any]):
