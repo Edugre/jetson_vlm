@@ -69,8 +69,14 @@ class YOLOVideoStreamer:
         self.auto_tracking = True
         self.pan_step_small = 3
         self.tilt_step_small = 3
-        self.center_x_margin = 0.10
-        self.center_y_margin = 0.10
+        self.center_x_margin = 0.15  # Larger deadzone to prevent jitter
+        self.center_y_margin = 0.15
+        
+        # Tracking control
+        self.last_tracking_time = 0
+        self.tracking_cooldown = 0.5  # Minimum time between movements
+        self.min_tracking_confidence = 0.7  # Only track high-confidence detections
+        self.last_tracked_person = None
         
         # Statistics
         self.stats = {
@@ -199,8 +205,34 @@ class YOLOVideoStreamer:
                 "auto_tracking": self.auto_tracking,
                 "tracking_enabled": self.tracking_enabled,
                 "pan_step": self.pan_step_small,
-                "tilt_step": self.tilt_step_small
+                "tilt_step": self.tilt_step_small,
+                "min_confidence": self.min_tracking_confidence,
+                "tracking_cooldown": self.tracking_cooldown,
+                "deadzone_x": self.center_x_margin,
+                "deadzone_y": self.center_y_margin
             })
+        
+        @self.app.route('/api/tracking/confidence/<float:confidence>')
+        def set_tracking_confidence(confidence):
+            """Set minimum confidence for tracking"""
+            if 0.0 <= confidence <= 1.0:
+                self.min_tracking_confidence = confidence
+                return jsonify({
+                    "min_tracking_confidence": confidence,
+                    "status": "updated"
+                })
+            return jsonify({"error": "confidence must be between 0.0 and 1.0"}), 400
+        
+        @self.app.route('/api/tracking/cooldown/<float:cooldown>')
+        def set_tracking_cooldown(cooldown):
+            """Set tracking cooldown period"""
+            if cooldown >= 0.0:
+                self.tracking_cooldown = cooldown
+                return jsonify({
+                    "tracking_cooldown": cooldown,
+                    "status": "updated"
+                })
+            return jsonify({"error": "cooldown must be >= 0.0"}), 400
     
     def _setup_socketio(self):
         """Setup SocketIO events"""
@@ -433,68 +465,119 @@ class YOLOVideoStreamer:
     def _perform_auto_tracking(self, persons: list, frame_info: dict):
         """Perform automatic camera tracking based on detected persons"""
         try:
+            current_time = time.time()
+            
+            # Check if tracking is enabled
+            if not self.auto_tracking:
+                return
+            
+            # Check cooldown to prevent jittery movement
+            if current_time - self.last_tracking_time < self.tracking_cooldown:
+                return
+            
+            # No persons detected
             if not persons:
+                logger.debug("No persons detected for tracking")
+                return
+            
+            # Filter persons by confidence threshold
+            confident_persons = [p for p in persons if p.get("conf", 0) >= self.min_tracking_confidence]
+            
+            if not confident_persons:
+                logger.debug(f"No persons above confidence threshold {self.min_tracking_confidence}")
                 return
             
             # Get the most confident person for tracking
-            best_person = max(persons, key=lambda p: p.get("conf", 0))
+            best_person = max(confident_persons, key=lambda p: p.get("conf", 0))
             bbox = best_person.get("bbox", [0, 0, 0, 0])
+            confidence = best_person.get("conf", 0)
+            
+            logger.info(f"Tracking person with {confidence:.1%} confidence at bbox: {bbox}")
             
             frame_w = frame_info.get("w", 640)
             frame_h = frame_info.get("h", 480)
             
-            # Apply the nudge-to-center logic from main.py
-            side, vert = self._nudge_to_center(bbox, frame_w, frame_h)
+            # Apply the nudge-to-center logic
+            moved = self._nudge_to_center(bbox, frame_w, frame_h, best_person)
             
-            # Emit tracking action to web clients
-            self.socketio.emit('auto_tracking', {
-                'person': best_person,
-                'action': {'side': side, 'vert': vert},
-                'frame_size': {'w': frame_w, 'h': frame_h},
-                'timestamp': time.time()
-            })
+            # Update tracking time only if we actually moved
+            if moved:
+                self.last_tracking_time = current_time
+                self.last_tracked_person = best_person
+                
+                # Emit tracking action to web clients
+                self.socketio.emit('auto_tracking', {
+                    'person': best_person,
+                    'frame_size': {'w': frame_w, 'h': frame_h},
+                    'timestamp': current_time,
+                    'moved': True
+                })
             
         except Exception as e:
             logger.error(f"Error in auto-tracking: {e}")
     
-    def _nudge_to_center(self, bbox: list, frame_w: int, frame_h: int) -> tuple:
-        """Nudge camera to center the person (from main.py logic)"""
+    def _nudge_to_center(self, bbox: list, frame_w: int, frame_h: int, person_data: dict = None) -> bool:
+        """Nudge camera to center the person (improved logic)"""
         try:
             x1, y1, x2, y2 = bbox
             cx = (x1 + x2) / 2.0
             cy = (y1 + y2) / 2.0
+            
+            # Frame center
+            center_x = frame_w / 2.0
+            center_y = frame_h / 2.0
+            
+            # Calculate offsets from center
+            offset_x = cx - center_x
+            offset_y = cy - center_y
+            
+            # Define movement thresholds (deadzone)
+            x_threshold = frame_w * self.center_x_margin
+            y_threshold = frame_h * self.center_y_margin
+            
+            moved = False
+            actions = []
 
             # Horizontal movement
-            left_border = frame_w * (0.5 - self.center_x_margin)
-            right_border = frame_w * (0.5 + self.center_x_margin)
-            
-            if cx < left_border:
-                self.servo_controller.move_left(self.pan_step_small)
-                side = "left"
-            elif cx > right_border:
-                self.servo_controller.move_right(self.pan_step_small)
-                side = "right"
+            if abs(offset_x) > x_threshold:
+                if offset_x > 0:  # Person is to the right, move camera right
+                    result = self.servo_controller.move_right(self.pan_step_small)
+                    actions.append("move_right")
+                    moved = True
+                    logger.info(f"Moving camera RIGHT - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
+                else:  # Person is to the left, move camera left
+                    result = self.servo_controller.move_left(self.pan_step_small)
+                    actions.append("move_left")
+                    moved = True
+                    logger.info(f"Moving camera LEFT - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
             else:
-                side = "center-x"
+                logger.debug(f"Horizontal CENTERED - person at x={cx:.0f}, center={center_x:.0f}, offset={offset_x:.0f}")
 
             # Vertical movement (y=0 is top)
-            top_border = frame_h * (0.5 - self.center_y_margin)
-            bottom_border = frame_h * (0.5 + self.center_y_margin)
-            
-            if cy < top_border:
-                self.servo_controller.move_up(self.tilt_step_small)
-                vert = "up"
-            elif cy > bottom_border:
-                self.servo_controller.move_down(self.tilt_step_small)
-                vert = "down"
+            if abs(offset_y) > y_threshold:
+                if offset_y > 0:  # Person is below center, move camera down
+                    result = self.servo_controller.move_down(self.tilt_step_small)
+                    actions.append("move_down")
+                    moved = True
+                    logger.info(f"Moving camera DOWN - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
+                else:  # Person is above center, move camera up
+                    result = self.servo_controller.move_up(self.tilt_step_small)
+                    actions.append("move_up")
+                    moved = True
+                    logger.info(f"Moving camera UP - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
             else:
-                vert = "center-y"
-
-            return side, vert
+                logger.debug(f"Vertical CENTERED - person at y={cy:.0f}, center={center_y:.0f}, offset={offset_y:.0f}")
+            
+            if moved:
+                logger.info(f"🎯 Camera tracking: {', '.join(actions)} - Person confidence: {person_data.get('conf', 0):.1%}")
+            else:
+                logger.debug(f"👁️  Person already centered - no movement needed")
+            
+            return moved
             
         except Exception as e:
             logger.error(f"Error in nudge_to_center: {e}")
-            return "error", "error"
+            return False
     
     def _on_detection_event(self, event_data: Dict[str, Any]):
         """Handle detection events from YOLO detector"""
