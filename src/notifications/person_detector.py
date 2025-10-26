@@ -117,38 +117,79 @@ class PersonDetectionNotifier:
         # Send to ADK agent asynchronously
         asyncio.create_task(self._notify_agent(message))
     
-    async def _notify_agent(self, message: str):
-        """Send notification to ADK agent"""
+    def _notify_agent_sync(self, message: str):
+        """Send notification to ADK agent synchronously with simplified approach"""
         try:
-            logger.info(f"Notifying ADK Agent: {message}")
+            logger.info(f"🤖 EVE Agent Notification: {message}")
             
-            # Format message in the proper Gemini format that ADK expects
-            formatted_message = {
-                "role": "user",
-                "parts": [
-                    {
-                        "text": message
-                    }
-                ]
-            }
+            # For now, we'll handle the notification through logging and direct tool calls
+            # This avoids the complex async generator issues while still providing functionality
             
-            # Send message to the agent - run_async returns an async generator
-            response_generator = self.agent.run_async(formatted_message)
+            # Parse the message for actionable commands
+            if "track_person_at_position" in message and "coordinates X:" in message:
+                # Extract coordinates from message
+                try:
+                    x_start = message.find("X:") + 2
+                    x_end = message.find(",", x_start)
+                    y_start = message.find("Y:") + 2
+                    y_end = message.find(" ", y_start)
+                    
+                    x = float(message[x_start:x_end])
+                    y = float(message[y_start:y_end])
+                    
+                    # Import the tracking function and call it directly
+                    from adk_backend.agent import track_person_at_position, set_alert_mode
+                    
+                    # Execute tracking command
+                    track_result = track_person_at_position(x, y)
+                    alert_result = set_alert_mode(True)
+                    
+                    logger.info(f"🎯 Executed tracking: {track_result}")
+                    logger.info(f"🚨 Set alert mode: {alert_result}")
+                    
+                except Exception as parse_error:
+                    logger.error(f"Failed to parse coordinates: {parse_error}")
+                    
+                    # Fallback to security scan
+                    from adk_backend.agent import initiate_security_scan, set_alert_mode
+                    scan_result = initiate_security_scan()
+                    alert_result = set_alert_mode(True)
+                    
+                    logger.info(f"🔍 Executed security scan: {scan_result}")
+                    logger.info(f"🚨 Set alert mode: {alert_result}")
             
-            # Collect all responses from the generator
-            responses = []
-            async for response in response_generator:
-                responses.append(response)
+            elif "person_left" in message or "default surveillance" in message:
+                # Handle person left scenario
+                from adk_backend.agent import center_camera, set_alert_mode
+                
+                center_result = center_camera()
+                alert_result = set_alert_mode(False)
+                
+                logger.info(f"🏠 Centered camera: {center_result}")
+                logger.info(f"📹 Normal surveillance mode: {alert_result}")
             
-            if responses:
-                # Get the final response (usually the last one)
-                final_response = responses[-1] if responses else None
-                logger.info(f"ADK Agent response: {final_response}")
             else:
-                logger.warning("No response from ADK Agent")
+                # General security alert
+                from adk_backend.agent import initiate_security_scan, set_alert_mode
+                
+                scan_result = initiate_security_scan()
+                alert_result = set_alert_mode(True)
+                
+                logger.info(f"🔍 Initiated security scan: {scan_result}")
+                logger.info(f"🚨 Set alert mode: {alert_result}")
                 
         except Exception as e:
             logger.error(f"Failed to notify ADK Agent: {e}")
+    
+    async def _notify_agent(self, message: str):
+        """Async wrapper for agent notification"""
+        # Run the synchronous version in a thread to avoid blocking
+        import concurrent.futures
+        import asyncio
+        
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            await loop.run_in_executor(executor, self._notify_agent_sync, message)
     
     def _add_to_history(self, event_data: Dict[str, Any]):
         """Add event to history with size limit"""

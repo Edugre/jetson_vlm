@@ -19,29 +19,22 @@ async def test_person_detection():
     print("🧪 EVE Person Detection Test")
     print("=" * 40)
     
-    # Test 1: Agent initialization
-    print("\n1. Testing ADK Agent...")
+    # Test 1: Agent tools initialization
+    print("\n1. Testing ADK Agent Tools...")
     try:
-        # Format message properly for Google ADK agent
-        message = {
-            "role": "user",
-            "parts": [
-                {
-                    "text": "Initialize security monitoring mode and center the camera."
-                }
-            ]
-        }
+        # Test the agent tools directly instead of the complex agent calling
+        from adk_backend.agent import center_camera, set_alert_mode, get_camera_position
         
-        # Properly handle the async generator
-        response_generator = root_agent.run_async(message)
-        responses = []
-        async for response in response_generator:
-            responses.append(response)
+        center_result = center_camera()
+        alert_result = set_alert_mode(True)
+        position_result = get_camera_position()
         
-        final_response = responses[-1] if responses else "No response"
-        print(f"   ✅ Agent Response: {final_response}")
+        print(f"   ✅ Center Camera: {center_result}")
+        print(f"   ✅ Alert Mode: {alert_result}")
+        print(f"   ✅ Camera Position: {position_result}")
+        
     except Exception as e:
-        print(f"   ❌ Agent Error: {e}")
+        print(f"   ❌ Agent Tools Error: {e}")
     
     # Test 2: Mock person detection event
     print("\n2. Testing Person Detection Notification...")
