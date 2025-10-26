@@ -31,11 +31,19 @@ def main():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    print("🚀 EVE Security System - Live Video Stream")
+    print("🚀 EVE Security System - Integrated Live Stream")
     print("=" * 50)
-    print(f"📹 Camera: {args.camera}")
-    print(f"🌐 Server: http://{args.host}:{args.port}")
-    print(f"🎯 Confidence: {args.confidence}")
+    print("🎥 FEATURES:")
+    print("  • Live video streaming with YOLO person detection")
+    print("  • Real-time person tracking with servo camera control")
+    print("  • Web interface with manual camera controls")
+    print("  • Automatic security alerts and EVE agent integration")
+    print("  • Person detection events trigger camera movements")
+    print("")
+    print("⚙️  CONFIGURATION:")
+    print(f"  📹 Camera: {args.camera}")
+    print(f"  🌐 Server: http://{args.host}:{args.port}")
+    print(f"  🎯 Confidence: {args.confidence}")
     print("=" * 50)
     
     try:

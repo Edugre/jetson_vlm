@@ -125,6 +125,79 @@
             box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
         }
 
+        .btn-center {
+            background: linear-gradient(45deg, #0088ff, #0066cc);
+            color: white;
+        }
+
+        .btn-center:hover {
+            background: linear-gradient(45deg, #0066cc, #004499);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 136, 255, 0.4);
+        }
+
+        .btn-track {
+            background: linear-gradient(45deg, #ff8800, #cc6600);
+            color: white;
+        }
+
+        .btn-track:hover {
+            background: linear-gradient(45deg, #cc6600, #994400);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 136, 0, 0.4);
+        }
+
+        .btn-track.disabled {
+            background: linear-gradient(45deg, #666, #444);
+            opacity: 0.6;
+        }
+
+        .camera-controls {
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .camera-controls h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #00ff00;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #333, #555);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #555, #777);
+            transform: scale(1.1);
+            border-color: #00ff00;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
         .sidebar {
             flex: 1;
             display: flex;
@@ -305,6 +378,23 @@
             <div class="controls">
                 <button class="btn btn-start" onclick="startStream()">🎥 Start Stream</button>
                 <button class="btn btn-stop" onclick="stopStream()">⏹️ Stop Stream</button>
+                <button class="btn btn-center" onclick="centerCamera()">🎯 Center Camera</button>
+                <button class="btn btn-track" id="trackBtn" onclick="toggleTracking()">🤖 Auto-Track: ON</button>
+            </div>
+            
+            <div class="camera-controls">
+                <h3>🕹️ Manual Camera Control</h3>
+                <div class="control-grid">
+                    <div></div>
+                    <button class="control-btn" onclick="moveCamera('up')">⬆️</button>
+                    <div></div>
+                    <button class="control-btn" onclick="moveCamera('left')">⬅️</button>
+                    <button class="control-btn" onclick="centerCamera()">🎯</button>
+                    <button class="control-btn" onclick="moveCamera('right')">➡️</button>
+                    <div></div>
+                    <button class="control-btn" onclick="moveCamera('down')">⬇️</button>
+                    <div></div>
+                </div>
             </div>
         </div>
 
@@ -382,6 +472,23 @@
         // Detection events
         socket.on('detection_event', function(data) {
             handleDetectionEvent(data);
+        });
+
+        // Camera actions
+        socket.on('camera_action', function(data) {
+            addLog(`🎯 Camera moved: ${data.action}`, 'info');
+        });
+
+        // Auto-tracking events
+        socket.on('auto_tracking', function(data) {
+            const action = data.action;
+            addLog(`🤖 Auto-tracking: moved ${action.side}, ${action.vert}`, 'info');
+        });
+
+        // Tracking status updates
+        socket.on('tracking_status', function(data) {
+            updateTrackingButton(data.auto_tracking);
+            addLog(data.message, 'info');
         });
 
         // Status messages
@@ -501,6 +608,52 @@
                 .catch(error => {
                     addLog('Failed to stop stream: ' + error, 'error');
                 });
+        }
+
+        function centerCamera() {
+            fetch('/api/camera/center')
+                .then(response => response.json())
+                .then(data => {
+                    addLog('🎯 Camera centered', 'info');
+                })
+                .catch(error => {
+                    addLog('Failed to center camera: ' + error, 'error');
+                });
+        }
+
+        function moveCamera(direction) {
+            fetch(`/api/camera/move/${direction}`)
+                .then(response => response.json())
+                .then(data => {
+                    addLog(`🎯 Camera moved ${direction}`, 'info');
+                })
+                .catch(error => {
+                    addLog(`Failed to move camera ${direction}: ` + error, 'error');
+                });
+        }
+
+        function toggleTracking() {
+            fetch('/api/tracking/toggle')
+                .then(response => response.json())
+                .then(data => {
+                    updateTrackingButton(data.auto_tracking);
+                    const status = data.auto_tracking ? 'enabled' : 'disabled';
+                    addLog(`🤖 Auto-tracking ${status}`, 'info');
+                })
+                .catch(error => {
+                    addLog('Failed to toggle tracking: ' + error, 'error');
+                });
+        }
+
+        function updateTrackingButton(enabled) {
+            const btn = document.getElementById('trackBtn');
+            if (enabled) {
+                btn.textContent = '🤖 Auto-Track: ON';
+                btn.classList.remove('disabled');
+            } else {
+                btn.textContent = '🤖 Auto-Track: OFF';
+                btn.classList.add('disabled');
+            }
         }
 
         // Auto-refresh stats

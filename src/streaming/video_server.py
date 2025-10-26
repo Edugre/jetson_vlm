@@ -15,6 +15,11 @@ import numpy as np
 
 from yolo_backend.detector import YOLODetector
 from notifications.person_detector import person_notifier
+from adk_backend.servo_controller import ServoController
+from adk_backend.agent import (
+    center_camera, set_camera_position, get_camera_position,
+    track_person_at_position, initiate_security_scan, set_alert_mode
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -52,9 +57,20 @@ class YOLOVideoStreamer:
         self.current_detections = []
         self.frame_lock = threading.Lock()
         
+        # Servo controller for camera tracking
+        self.servo_controller = ServoController()
+        
         # Streaming control
         self.streaming = False
         self.stream_thread = None
+        
+        # EVE tracking parameters
+        self.tracking_enabled = True
+        self.auto_tracking = True
+        self.pan_step_small = 3
+        self.tilt_step_small = 3
+        self.center_x_margin = 0.10
+        self.center_y_margin = 0.10
         
         # Statistics
         self.stats = {
@@ -112,6 +128,79 @@ class YOLOVideoStreamer:
                 status.update(self.stats)
                 return jsonify(status)
             return jsonify({"error": "detector_not_initialized"})
+        
+        @self.app.route('/api/camera/center')
+        def center_camera_endpoint():
+            """Center the camera"""
+            try:
+                result = center_camera()
+                self.socketio.emit('camera_action', {
+                    'action': 'center',
+                    'result': result,
+                    'timestamp': time.time()
+                })
+                return jsonify(result)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        
+        @self.app.route('/api/camera/position')
+        def get_camera_position_endpoint():
+            """Get current camera position"""
+            try:
+                result = get_camera_position()
+                return jsonify(result)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        
+        @self.app.route('/api/camera/move/<direction>')
+        def move_camera_endpoint(direction):
+            """Move camera in specified direction"""
+            try:
+                if direction == 'up':
+                    result = self.servo_controller.move_up(self.tilt_step_small)
+                elif direction == 'down':
+                    result = self.servo_controller.move_down(self.tilt_step_small)
+                elif direction == 'left':
+                    result = self.servo_controller.move_left(self.pan_step_small)
+                elif direction == 'right':
+                    result = self.servo_controller.move_right(self.pan_step_small)
+                else:
+                    return jsonify({"error": "invalid_direction"}), 400
+                
+                self.socketio.emit('camera_action', {
+                    'action': f'move_{direction}',
+                    'result': result,
+                    'timestamp': time.time()
+                })
+                return jsonify(result)
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        
+        @self.app.route('/api/tracking/toggle')
+        def toggle_tracking():
+            """Toggle auto-tracking on/off"""
+            self.auto_tracking = not self.auto_tracking
+            status = "enabled" if self.auto_tracking else "disabled"
+            
+            self.socketio.emit('tracking_status', {
+                'auto_tracking': self.auto_tracking,
+                'message': f'Auto-tracking {status}'
+            })
+            
+            return jsonify({
+                "auto_tracking": self.auto_tracking,
+                "status": status
+            })
+        
+        @self.app.route('/api/tracking/status')
+        def tracking_status():
+            """Get current tracking status"""
+            return jsonify({
+                "auto_tracking": self.auto_tracking,
+                "tracking_enabled": self.tracking_enabled,
+                "pan_step": self.pan_step_small,
+                "tilt_step": self.tilt_step_small
+            })
     
     def _setup_socketio(self):
         """Setup SocketIO events"""
@@ -192,6 +281,10 @@ class YOLOVideoStreamer:
                 
                 # Update current detections
                 self.current_detections = persons
+                
+                # EVE Auto-tracking logic
+                if self.auto_tracking and persons:
+                    self._perform_auto_tracking(persons, frame_info)
                 
                 # Update statistics
                 fps_counter += 1
@@ -337,18 +430,106 @@ class YOLOVideoStreamer:
         except Exception as e:
             logger.error(f"Error emitting frame update: {e}")
     
+    def _perform_auto_tracking(self, persons: list, frame_info: dict):
+        """Perform automatic camera tracking based on detected persons"""
+        try:
+            if not persons:
+                return
+            
+            # Get the most confident person for tracking
+            best_person = max(persons, key=lambda p: p.get("conf", 0))
+            bbox = best_person.get("bbox", [0, 0, 0, 0])
+            
+            frame_w = frame_info.get("w", 640)
+            frame_h = frame_info.get("h", 480)
+            
+            # Apply the nudge-to-center logic from main.py
+            side, vert = self._nudge_to_center(bbox, frame_w, frame_h)
+            
+            # Emit tracking action to web clients
+            self.socketio.emit('auto_tracking', {
+                'person': best_person,
+                'action': {'side': side, 'vert': vert},
+                'frame_size': {'w': frame_w, 'h': frame_h},
+                'timestamp': time.time()
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in auto-tracking: {e}")
+    
+    def _nudge_to_center(self, bbox: list, frame_w: int, frame_h: int) -> tuple:
+        """Nudge camera to center the person (from main.py logic)"""
+        try:
+            x1, y1, x2, y2 = bbox
+            cx = (x1 + x2) / 2.0
+            cy = (y1 + y2) / 2.0
+
+            # Horizontal movement
+            left_border = frame_w * (0.5 - self.center_x_margin)
+            right_border = frame_w * (0.5 + self.center_x_margin)
+            
+            if cx < left_border:
+                self.servo_controller.move_left(self.pan_step_small)
+                side = "left"
+            elif cx > right_border:
+                self.servo_controller.move_right(self.pan_step_small)
+                side = "right"
+            else:
+                side = "center-x"
+
+            # Vertical movement (y=0 is top)
+            top_border = frame_h * (0.5 - self.center_y_margin)
+            bottom_border = frame_h * (0.5 + self.center_y_margin)
+            
+            if cy < top_border:
+                self.servo_controller.move_up(self.tilt_step_small)
+                vert = "up"
+            elif cy > bottom_border:
+                self.servo_controller.move_down(self.tilt_step_small)
+                vert = "down"
+            else:
+                vert = "center-y"
+
+            return side, vert
+            
+        except Exception as e:
+            logger.error(f"Error in nudge_to_center: {e}")
+            return "error", "error"
+    
     def _on_detection_event(self, event_data: Dict[str, Any]):
         """Handle detection events from YOLO detector"""
         try:
-            # Forward to person notifier
+            # Forward to person notifier (which handles EVE agent notifications)
             person_notifier.on_person_detected(event_data)
+            
+            # Handle security events
+            event_type = event_data.get('event')
+            person_count = event_data.get('person_count', 0)
+            
+            if event_type == 'person_entered':
+                # Set alert mode when person enters
+                try:
+                    set_alert_mode(True)
+                    logger.info("🚨 EVE Alert Mode activated - person detected")
+                except Exception as e:
+                    logger.error(f"Failed to set alert mode: {e}")
+            
+            elif event_type == 'person_left':
+                # Return to normal mode when all persons leave
+                try:
+                    set_alert_mode(False)
+                    center_camera()
+                    logger.info("📹 EVE returning to normal surveillance mode")
+                except Exception as e:
+                    logger.error(f"Failed to reset to normal mode: {e}")
             
             # Emit detection event to web clients
             self.socketio.emit('detection_event', {
-                'event': event_data.get('event'),
-                'person_count': event_data.get('person_count', 0),
+                'event': event_type,
+                'person_count': person_count,
                 'timestamp': event_data.get('timestamp', time.time()),
-                'persons': event_data.get('persons', [])
+                'persons': event_data.get('persons', []),
+                'eve_response': True  # Indicate EVE system responded
             })
             
         except Exception as e:
