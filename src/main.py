@@ -19,36 +19,72 @@ CENTER_X_MARGIN = 0.10  # 10% left/right deadband
 CENTER_Y_MARGIN = 0.10  # 10% up/down deadband
 CONFIDENCE_THRESHOLD = 0.6  # Higher confidence for fewer false positives
 
-def nudge_to_center(servo, frame_w, frame_h, bbox):
+def nudge_to_center(servo, frame_w, frame_h, bbox, person_id="unknown"):
+    """
+    Nudge camera to center a person's bounding box.
+    Returns detailed movement info for debugging.
+    """
     x1, y1, x2, y2 = bbox
     cx = (x1 + x2) / 2.0
     cy = (y1 + y2) / 2.0
+    
+    frame_center_x = frame_w / 2.0
+    frame_center_y = frame_h / 2.0
+    
+    # Calculate offsets from center (in pixels and percentage)
+    offset_x_px = cx - frame_center_x
+    offset_y_px = cy - frame_center_y
+    offset_x_pct = (offset_x_px / frame_w) * 100
+    offset_y_pct = (offset_y_px / frame_h) * 100
 
-    # Horizontal
+    # Horizontal movement
     left_border  = frame_w * (0.5 - CENTER_X_MARGIN)
     right_border = frame_w * (0.5 + CENTER_X_MARGIN)
+    
+    pan_moved = False
     if cx < left_border:
-        servo.move_left(PAN_STEP_SMALL)
-        side = "left"
+        result = servo.move_left(PAN_STEP_SMALL)
+        side = "LEFT"
+        pan_moved = True
+        logger.info(f"🎯 PAN LEFT {PAN_STEP_SMALL}° | Person {person_id} at x={cx:.0f} (needs {offset_x_px:.0f}px left) | New angle: {result['new_angle']}°")
     elif cx > right_border:
-        servo.move_right(PAN_STEP_SMALL)
-        side = "right"
+        result = servo.move_right(PAN_STEP_SMALL)
+        side = "RIGHT"
+        pan_moved = True
+        logger.info(f"🎯 PAN RIGHT {PAN_STEP_SMALL}° | Person {person_id} at x={cx:.0f} (needs {offset_x_px:.0f}px right) | New angle: {result['new_angle']}°")
     else:
-        side = "center-x"
+        side = "CENTERED-X"
 
-    # Vertical (y=0 is top)
+    # Vertical movement (y=0 is top)
     top_border    = frame_h * (0.5 - CENTER_Y_MARGIN)
     bottom_border = frame_h * (0.5 + CENTER_Y_MARGIN)
+    
+    tilt_moved = False
     if cy < top_border:
-        servo.move_up(TILT_STEP_SMALL)
-        vert = "up"
+        result = servo.move_up(TILT_STEP_SMALL)
+        vert = "UP"
+        tilt_moved = True
+        logger.info(f"🎯 TILT UP {TILT_STEP_SMALL}° | Person {person_id} at y={cy:.0f} (needs {-offset_y_px:.0f}px up) | New angle: {result['new_angle']}°")
     elif cy > bottom_border:
-        servo.move_down(TILT_STEP_SMALL)
-        vert = "down"
+        result = servo.move_down(TILT_STEP_SMALL)
+        vert = "DOWN"
+        tilt_moved = True
+        logger.info(f"🎯 TILT DOWN {TILT_STEP_SMALL}° | Person {person_id} at y={cy:.0f} (needs {offset_y_px:.0f}px down) | New angle: {result['new_angle']}°")
     else:
-        vert = "center-y"
+        vert = "CENTERED-Y"
+    
+    if not pan_moved and not tilt_moved:
+        logger.debug(f"✓ Person {person_id} already centered at ({cx:.0f}, {cy:.0f})")
 
-    return side, vert
+    return side, vert, {
+        "person_id": person_id,
+        "center": (cx, cy),
+        "offset_px": (offset_x_px, offset_y_px),
+        "offset_pct": (offset_x_pct, offset_y_pct),
+        "pan": side,
+        "tilt": vert,
+        "moved": pan_moved or tilt_moved
+    }
 
 def enhanced_person_callback(event_data):
     """Enhanced callback that provides person position data to the notifier"""
@@ -91,33 +127,76 @@ def main():
     
     logger.info("🎯 Person detection callbacks registered")
     logger.info("📹 Starting YOLO detection stream...")
+    logger.info(f"⚙️  Settings: PAN_STEP={PAN_STEP_SMALL}°, TILT_STEP={TILT_STEP_SMALL}°, CENTER_MARGIN={CENTER_X_MARGIN*100}%")
     
     had_person = False
+    newest_person = None  # Track the first/newest person detected
+    frame_count = 0
 
     try:
         for pack in det.stream():
             persons = pack["persons"]
             frame = pack["frame"]
+            frame_count += 1
 
             if persons:
-                # Track the most confident person
-                person = max(persons, key=lambda d: d["conf"])
-                side, vert = nudge_to_center(servo, frame["w"], frame["h"], person["bbox"])
-
-                # Fire "anomaly" only on 0 -> 1 transition (new person appeared)
+                # If this is the first frame with people, pick the newest (first detected)
                 if not had_person:
-                    log(f"Anomaly: person entered (first seen). Hint side={side}, vert={vert}")
+                    # Sort by area (largest first) to pick the most prominent person as "newest"
+                    newest_person = max(persons, key=lambda d: d["area"])
+                    person_id = f"P{frame_count}"
+                    logger.info(f"🆕 NEW PERSON DETECTED! Person {person_id} | Area: {newest_person['area']:.0f}px² | Conf: {newest_person['conf']:.2f}")
+                    logger.info(f"📊 Total people in frame: {len(persons)}")
                     had_person = True
+                    
+                    # Log frame info
+                    logger.info(f"📐 Frame dimensions: {frame['w']}x{frame['h']}")
+                    logger.info(f"📍 Person center: ({newest_person['center'][0]:.0f}, {newest_person['center'][1]:.0f})")
+                
+                # Track the newest person (if still in frame, otherwise pick largest)
+                if newest_person:
+                    # Check if newest_person still exists by comparing bounding boxes
+                    still_present = any(
+                        abs(p['center'][0] - newest_person['center'][0]) < 50 and 
+                        abs(p['center'][1] - newest_person['center'][1]) < 50
+                        for p in persons
+                    )
+                    
+                    if still_present:
+                        # Update to latest position of the same person
+                        for p in persons:
+                            if abs(p['center'][0] - newest_person['center'][0]) < 50 and \
+                               abs(p['center'][1] - newest_person['center'][1]) < 50:
+                                newest_person = p
+                                break
+                    else:
+                        # Newest person left, track largest remaining
+                        newest_person = max(persons, key=lambda d: d["area"])
+                        logger.info(f"🔄 Switching target to largest person | Area: {newest_person['area']:.0f}px²")
+                
+                # Center the camera on the newest person
+                person_id = f"P{frame_count}" if not had_person else "TARGET"
+                side, vert, debug_info = nudge_to_center(
+                    servo, frame['w'], frame['h'], newest_person['bbox'], person_id
+                )
+                
+                # Log summary every 30 frames if centered
+                if frame_count % 30 == 0 and not debug_info['moved']:
+                    logger.info(f"✓ TARGET LOCKED | Tracking {len(persons)} person(s) | Center offset: ({debug_info['offset_px'][0]:.0f}px, {debug_info['offset_px'][1]:.0f}px)")
+                    
             else:
                 if had_person:
-                    log("Info: person left frame.")
+                    logger.info("👋 ALL PERSONS LEFT FRAME")
+                    newest_person = None
                 had_person = False
                 
     except KeyboardInterrupt:
         logger.info("🛑 Shutting down EVE Security System...")
     except Exception as e:
-        logger.error(f"Error in main loop: {e}")
+        logger.error(f"❌ Error in main loop: {e}", exc_info=True)
     finally:
+        servo_pos = servo.get_position()
+        logger.info(f"📊 Final servo position: Pan={servo_pos['pan']}°, Tilt={servo_pos['tilt']}°")
         logger.info("👋 EVE Security System stopped")
 
 def run_eve_system():

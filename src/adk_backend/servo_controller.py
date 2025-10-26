@@ -67,24 +67,32 @@ class ServoController:
         time.sleep(0.5)
     
     def move_up(self, step=10):
+        old_angle = self.tilt_angle
         self.tilt_angle = max(0, self.tilt_angle - step)
         self.tilt_servo.angle = self.tilt_angle
-        return {"direction": "up", "new_angle": self.tilt_angle}
+        print(f"⬆️  TILT UP: {old_angle}° → {self.tilt_angle}° (step={step}°)")
+        return {"direction": "up", "new_angle": self.tilt_angle, "old_angle": old_angle}
     
     def move_down(self, step=10):
+        old_angle = self.tilt_angle
         self.tilt_angle = min(180, self.tilt_angle + step)
         self.tilt_servo.angle = self.tilt_angle
-        return {"direction": "down", "new_angle": self.tilt_angle}
+        print(f"⬇️  TILT DOWN: {old_angle}° → {self.tilt_angle}° (step={step}°)")
+        return {"direction": "down", "new_angle": self.tilt_angle, "old_angle": old_angle}
     
     def move_left(self, step=10):
+        old_angle = self.pan_angle
         self.pan_angle = max(0, self.pan_angle - step)
         self.pan_servo.angle = self.pan_angle
-        return {"direction": "left", "new_angle": self.pan_angle}
+        print(f"⬅️  PAN LEFT: {old_angle}° → {self.pan_angle}° (step={step}°)")
+        return {"direction": "left", "new_angle": self.pan_angle, "old_angle": old_angle}
     
     def move_right(self, step=10):
+        old_angle = self.pan_angle
         self.pan_angle = min(180, self.pan_angle + step)
         self.pan_servo.angle = self.pan_angle
-        return {"direction": "right", "new_angle": self.pan_angle}
+        print(f"➡️  PAN RIGHT: {old_angle}° → {self.pan_angle}° (step={step}°)")
+        return {"direction": "right", "new_angle": self.pan_angle, "old_angle": old_angle}
     
     def set_pan_tilt(self, pan_angle, tilt_angle):
         self.pan_angle = max(0, min(180, pan_angle))
